@@ -13,6 +13,7 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.xiaomi.settings.display.ColorModeService;
+import com.xiaomi.settings.touch.DoubleTapService;
 import com.xiaomi.settings.touchsampling.TouchSamplingUtils;
 import com.xiaomi.settings.touchsampling.TouchSamplingService;
 
@@ -36,6 +37,10 @@ public class BootCompletedReceiver extends BroadcastReceiver {
     private static void onLockedBootCompleted(Context context) {
         // Display
         context.startServiceAsUser(new Intent(context, ColorModeService.class),
+                UserHandle.CURRENT);
+
+        // Double Tap to Wake
+        context.startServiceAsUser(new Intent(context, DoubleTapService.class),
                 UserHandle.CURRENT);
 
         // High Touch polling rate
