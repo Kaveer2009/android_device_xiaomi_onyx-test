@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.xiaomi.settings.battery.ChargingLimitService;
 import com.xiaomi.settings.display.ColorModeService;
 import com.xiaomi.settings.touch.DoubleTapService;
 import com.xiaomi.settings.touchsampling.TouchSamplingUtils;
@@ -41,6 +42,10 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         // Double Tap to Wake
         context.startServiceAsUser(new Intent(context, DoubleTapService.class),
+                UserHandle.CURRENT);
+
+        // Battery
+        context.startServiceAsUser(new Intent(context, ChargingLimitService.class),
                 UserHandle.CURRENT);
 
         // High Touch polling rate
