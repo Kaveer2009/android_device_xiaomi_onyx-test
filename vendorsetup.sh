@@ -1,50 +1,301 @@
 #!/bin/bash
 
-# Colors
-GREEN='\033[1;32m'
-RED='\033[1;31m'
-YELLOW='\033[1;33m'
-BLUE='\033[1;34m'
-NC='\033[0m'
+# ============================================================
+#   POCO F7 | Onyx — Vendor Setup Script
+#   Made with 💖 by Kaveer Rana
+# ============================================================
+
+# ── Colour Palette ──────────────────────────────────────────
+RESET='\033[0m'
+BOLD='\033[1m'
+DIM='\033[2m'
+ITALIC='\033[3m'
+UNDERLINE='\033[4m'
+
+# Foreground
+BLACK='\033[30m'
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+BLUE='\033[34m'
+MAGENTA='\033[35m'
+CYAN='\033[36m'
+WHITE='\033[37m'
+
+# Bright Foreground
+BRED='\033[91m'
+BGREEN='\033[92m'
+BYELLOW='\033[93m'
+BBLUE='\033[94m'
+BMAGENTA='\033[95m'
+BCYAN='\033[96m'
+BWHITE='\033[97m'
+
+# Background
+BG_BLACK='\033[40m'
+BG_RED='\033[41m'
+BG_BLUE='\033[44m'
+BG_MAGENTA='\033[45m'
+BG_CYAN='\033[46m'
 
 FAILED=0
+CLONED_COUNT=0
+SKIPPED_COUNT=0
+TOTAL=5
 
+# ── Helper: print centred text (approx 70 cols) ─────────────
+centre() {
+    local text="$1"
+    local colour="$2"
+    local pad=$(( (70 - ${#text}) / 2 ))
+    printf "%${pad}s"
+    echo -e "${colour}${text}${RESET}"
+}
+
+# ── Helper: horizontal rule ──────────────────────────────────
+hr() { echo -e "${DIM}${1:-$CYAN}$(printf '─%.0s' {1..70})${RESET}"; }
+
+# ── Spinner ──────────────────────────────────────────────────
+spin() {
+    local pid=$1
+    local msg="$2"
+    local frames=('⣾' '⣽' '⣻' '⢿' '⡿' '⣟' '⣯' '⣷')
+    local i=0
+    while kill -0 "$pid" 2>/dev/null; do
+        printf "\r  ${BMAGENTA}${frames[$i]}${RESET}  ${CYAN}${msg}${RESET}   "
+        i=$(( (i+1) % 8 ))
+        sleep 0.08
+    done
+    printf "\r"
+}
+
+# ── Boot sequence animation ──────────────────────────────────
+boot_flash() {
+    local colours=("$BBLUE" "$BCYAN" "$BMAGENTA" "$BYELLOW" "$BGREEN")
+    for c in "${colours[@]}"; do
+        clear
+        echo ""
+        echo -e "${c}${BOLD}"
+        cat << 'BANNER'
+  ██████╗  ██████╗  ██████╗ ██████╗     ███████╗███████╗
+  ██╔══██╗██╔═══██╗██╔════╝██╔═══██╗    ██╔════╝╚════██║
+  ██████╔╝██║   ██║██║     ██║   ██║    █████╗      ██╔╝
+  ██╔═══╝ ██║   ██║██║     ██║   ██║    ██╔══╝     ██╔╝
+  ██║     ╚██████╔╝╚██████╗╚██████╔╝    ██║        ██║
+  ╚═╝      ╚═════╝  ╚═════╝ ╚═════╝    ╚═╝        ╚═╝
+BANNER
+        echo -e "${RESET}"
+        sleep 0.07
+    done
+}
+
+# ── Main Banner ──────────────────────────────────────────────
+show_banner() {
+    clear
+    echo ""
+    echo -e "${BBLUE}${BOLD}"
+    cat << 'BANNER'
+  ██████╗  ██████╗  ██████╗ ██████╗     ███████╗███████╗
+  ██╔══██╗██╔═══██╗██╔════╝██╔═══██╗    ██╔════╝╚════██║
+  ██████╔╝██║   ██║██║     ██║   ██║    █████╗      ██╔╝
+  ██╔═══╝ ██║   ██║██║     ██║   ██║    ██╔══╝     ██╔╝
+  ██║     ╚██████╔╝╚██████╗╚██████╔╝    ██║        ██║
+  ╚═╝      ╚═════╝  ╚═════╝ ╚═════╝    ╚═╝        ╚═╝
+BANNER
+    echo -e "${RESET}"
+
+    echo -e "  ${BMAGENTA}${BOLD}▌${RESET}${BOLD}${BWHITE}  P O C O   F 7   ·   C o d e n a m e :  ${BCYAN}O N Y X${RESET}${BMAGENTA}${BOLD}  ▐${RESET}"
+    echo ""
+    hr "$BBLUE"
+    echo -e "  ${DIM}${CYAN}Snapdragon 8s Gen 4  ·  Android Device Tree Setup  ·  Mediatek Free Zone${RESET}"
+    hr "$BBLUE"
+    echo ""
+    echo -e "  ${BMAGENTA}✦  ${ITALIC}${BWHITE}Made with ${BRED}❤${BWHITE}  by ${BYELLOW}Kaveer Rana${BWHITE}  ✦${RESET}"
+    echo ""
+}
+
+# ── Tree legend ──────────────────────────────────────────────
+show_tree_legend() {
+    echo ""
+    hr "$BMAGENTA"
+    echo -e "  ${BMAGENTA}${BOLD}⬡  SOURCE TREE — Required Repositories${RESET}"
+    hr "$BMAGENTA"
+    echo ""
+    echo -e "  ${BYELLOW}${BOLD}ROM Source Root  (/)${RESET}"
+    echo -e "  ${CYAN}│${RESET}"
+    echo -e "  ${CYAN}├──${RESET} ${BGREEN}vendor/${RESET}"
+    echo -e "  ${CYAN}│   ├──${RESET} ${BWHITE}xiaomi/onyx${RESET}           ${DIM}← Vendor blobs (proprietary)${RESET}"
+    echo -e "  ${CYAN}│   └──${RESET} ${BWHITE}xiaomi/GoogleCamera${RESET}   ${DIM}← GCam prebuilt package${RESET}"
+    echo -e "  ${CYAN}│${RESET}"
+    echo -e "  ${CYAN}├──${RESET} ${BBLUE}device/${RESET}"
+    echo -e "  ${CYAN}│   └──${RESET} ${BWHITE}xiaomi/onyx-kernel${RESET}    ${DIM}← Prebuilt kernel & modules${RESET}"
+    echo -e "  ${CYAN}│${RESET}"
+    echo -e "  ${CYAN}├──${RESET} ${BMAGENTA}hardware/${RESET}"
+    echo -e "  ${CYAN}│   └──${RESET} ${BWHITE}xiaomi${RESET}               ${DIM}← Xiaomi HAL interfaces${RESET}"
+    echo -e "  ${CYAN}│${RESET}"
+    echo -e "  ${CYAN}└──${RESET} ${BYELLOW}packages/${RESET}"
+    echo -e "  ${CYAN}    └──${RESET} ${BWHITE}apps/LunarisDolby${RESET}    ${DIM}← Dolby Atmos app${RESET}"
+    echo ""
+    hr "$BMAGENTA"
+    echo ""
+}
+
+# ── Progress bar ─────────────────────────────────────────────
+draw_progress() {
+    local done=$1
+    local total=$2
+    local width=40
+    local filled=$(( done * width / total ))
+    local empty=$(( width - filled ))
+    local pct=$(( done * 100 / total ))
+
+    local bar="${BGREEN}"
+    for ((i=0; i<filled; i++)); do bar+="█"; done
+    bar+="${DIM}${CYAN}"
+    for ((i=0; i<empty; i++)); do bar+="░"; done
+    bar+="${RESET}"
+
+    echo -e "  ${DIM}Progress:${RESET}  [${bar}]  ${BYELLOW}${BOLD}${pct}%%${RESET}  ${DIM}(${done}/${total})${RESET}"
+}
+
+# ── Clone a single repo with full UI ─────────────────────────
 check_and_clone() {
     local NAME="$1"
     local DIR="$2"
     local REPO="$3"
+    local ICON="$4"
+    local COLOUR="$5"
 
-    echo -e "${BLUE}Checking ${NAME}...${NC}"
+    echo -e "  ${COLOUR}${ICON}  ${BOLD}${NAME}${RESET}"
+    echo -e "  ${DIM}   Path  :${RESET} ${BWHITE}${DIR}${RESET}"
+    echo -e "  ${DIM}   Remote:${RESET} ${DIM}${REPO}${RESET}"
+    echo ""
 
     if [ -d "$DIR" ]; then
-        echo -e "${GREEN}✔ ${NAME} already exists at ${DIR}${NC}"
+        echo -e "  ${BGREEN}  ✔  Already present — skipping clone${RESET}"
+        SKIPPED_COUNT=$(( SKIPPED_COUNT + 1 ))
     else
-        echo -e "${YELLOW}✘ ${NAME} not found. Cloning...${NC}"
-        if git clone "$REPO" "$DIR"; then
-            echo -e "${GREEN}✔ ${NAME} cloned successfully.${NC}"
+        echo -e "  ${BYELLOW}  ⬇  Not found locally — initiating clone…${RESET}"
+        echo ""
+        (git clone --progress "$REPO" "$DIR" 2>&1 | \
+            while IFS= read -r line; do
+                echo -e "     ${DIM}${CYAN}${line}${RESET}"
+            done) &
+        local GIT_PID=$!
+        spin "$GIT_PID" "Fetching objects for ${NAME}…"
+        wait "$GIT_PID"
+        local EXIT_CODE=$?
+
+        if [ $EXIT_CODE -eq 0 ]; then
+            echo -e "  ${BGREEN}  ✔  ${NAME} — cloned successfully ✨${RESET}"
+            CLONED_COUNT=$(( CLONED_COUNT + 1 ))
         else
-            echo -e "${RED}✘ Failed to clone ${NAME} from ${REPO}.${NC}"
+            echo -e "  ${BRED}  ✘  ${NAME} — clone FAILED${RESET}"
+            echo -e "  ${DIM}${RED}     Source: ${REPO}${RESET}"
             FAILED=1
         fi
     fi
 
     echo ""
+    draw_progress $(( CLONED_COUNT + SKIPPED_COUNT + (FAILED > 0 ? 1 : 0) )) "$TOTAL"
+    echo ""
+    hr "$DIM"
+    echo ""
 }
 
-echo -e "${BLUE}==============================${NC}"
-echo -e "${BLUE}   Onyx Vendor Setup Script   ${NC}"
-echo -e "${BLUE}==============================${NC}"
+# ── Summary footer ───────────────────────────────────────────
+show_summary() {
+    echo ""
+    hr "$BCYAN"
+    echo -e "  ${BCYAN}${BOLD}⬡  SETUP SUMMARY${RESET}"
+    hr "$BCYAN"
+    echo ""
+    echo -e "  ${BGREEN}  ✔  Cloned   :  ${BOLD}${CLONED_COUNT}${RESET}"
+    echo -e "  ${BYELLOW}  ⊙  Skipped  :  ${BOLD}${SKIPPED_COUNT}${RESET}"
+    if [ "$FAILED" -ne 0 ]; then
+        echo -e "  ${BRED}  ✘  Failed   :  ${BOLD}$(( TOTAL - CLONED_COUNT - SKIPPED_COUNT ))${RESET}"
+    fi
+    echo ""
+    hr "$BCYAN"
+    echo ""
+
+    if [ "$FAILED" -eq 0 ]; then
+        echo -e "  ${BGREEN}${BOLD}"
+        cat << 'OK'
+   ██████╗ ██╗  ██╗
+  ██╔═══██╗██║ ██╔╝
+  ██║   ██║█████╔╝
+  ██║   ██║██╔═██╗
+  ╚██████╔╝██║  ██╗
+   ╚═════╝ ╚═╝  ╚═╝
+OK
+        echo -e "${RESET}"
+        echo -e "  ${BGREEN}${BOLD}  All trees are in place. You're ready to build! 🚀${RESET}"
+        echo ""
+        echo -e "  ${DIM}  Next steps:${RESET}"
+        echo -e "  ${CYAN}  $ ${BWHITE}lunch${RESET}           ${DIM}← pick your target${RESET}"
+        echo -e "  ${CYAN}  $ ${BWHITE}m bacon${RESET}         ${DIM}← or however you roll${RESET}"
+    else
+        echo -e "  ${BRED}${BOLD}  One or more repositories failed to clone.${RESET}"
+        echo -e "  ${YELLOW}  Check your internet connection and the remote URLs above.${RESET}"
+    fi
+
+    echo ""
+    hr "$BMAGENTA"
+    echo -e "  ${BMAGENTA}✦  ${ITALIC}${DIM}POCO F7 · Onyx · Built different${RESET}${BMAGENTA}  ✦${RESET}"
+    echo -e "  ${DIM}   Made with ${BRED}❤${RESET}${DIM}  by ${BYELLOW}Kaveer Rana${RESET}"
+    hr "$BMAGENTA"
+    echo ""
+}
+
+# ════════════════════════════════════════════════════════════
+#   E N T R Y P O I N T
+# ════════════════════════════════════════════════════════════
+
+boot_flash
+show_banner
+show_tree_legend
+
+sleep 0.4
+
+echo -e "  ${BWHITE}${BOLD}⬡  Starting dependency resolution…${RESET}"
 echo ""
+sleep 0.3
 
-check_and_clone "Vendor blobs"    "vendor/xiaomi/onyx"              "https://github.com/Kaveer2009/vendor_xiaomi_onyx.git"
-check_and_clone "Kernel source"   "device/xiaomi/onyx-kernel"       "https://github.com/Kaveer2009/device_xiaomi_onyx-kernel.git"
-check_and_clone "Xiaomi hardware" "hardware/xiaomi"                  "https://github.com/xiaomi-sm8750-onyx/android_hardware_xiaomi.git"
-check_and_clone "Lunaris Dolby"   "packages/apps/LunarisDolby"      "https://github.com/unmoved21/packages_apps_LunarisDolby.git"
-check_and_clone "Google Camera"   "vendor/xiaomi/GoogleCamera"       "https://github.com/Onyx-Hubs/vendor_xiaomi_GoogleCamera.git"
+# ── Repo definitions ─────────────────────────────────────────
+#     NAME                  DIR                              REPO                                                                    ICON  COLOUR
+check_and_clone \
+    "Vendor Blobs" \
+    "vendor/xiaomi/onyx" \
+    "https://github.com/Kaveer2009/vendor_xiaomi_onyx.git" \
+    "📦" "$BBLUE"
 
-if [ "$FAILED" -eq 0 ]; then
-    echo -e "${GREEN}All checks completed successfully.${NC}"
-else
-    echo -e "${RED}Some repositories failed to clone. Please check the errors above.${NC}"
+check_and_clone \
+    "Kernel Source" \
+    "device/xiaomi/onyx-kernel" \
+    "https://github.com/Kaveer2009/device_xiaomi_onyx-kernel.git" \
+    "🧬" "$BCYAN"
+
+check_and_clone \
+    "Xiaomi Hardware HALs" \
+    "hardware/xiaomi" \
+    "https://github.com/xiaomi-sm8750-onyx/android_hardware_xiaomi.git" \
+    "⚙️ " "$BMAGENTA"
+
+check_and_clone \
+    "Lunaris Dolby Atmos" \
+    "packages/apps/LunarisDolby" \
+    "https://github.com/unmoved21/packages_apps_LunarisDolby.git" \
+    "🎵" "$BYELLOW"
+
+check_and_clone \
+    "Google Camera" \
+    "vendor/xiaomi/GoogleCamera" \
+    "https://github.com/Onyx-Hubs/vendor_xiaomi_GoogleCamera.git" \
+    "📸" "$BGREEN"
+
+show_summary
+
+if [ "$FAILED" -ne 0 ]; then
     exit 1
 fi
