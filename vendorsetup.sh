@@ -279,7 +279,7 @@ check_and_clone \
 check_and_clone \
     "Xiaomi Hardware HALs" \
     "hardware/xiaomi" \
-    "https://github.com/xiaomi-sm8750-onyx/android_hardware_xiaomi.git" \
+    "https://github.com/Kaveer2009/android_hardware_xiaomi.git" \
     "⚙️ " "$BMAGENTA"
 
 check_and_clone \
