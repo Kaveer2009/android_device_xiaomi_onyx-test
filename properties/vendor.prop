@@ -72,7 +72,7 @@ persist.vendor.dpm.vndr.idletimer.mode=default
 # DRM
 drm.service.enabled=true
 
-# fingerprint
+# Fingerprint
 persist.vendor.fingerprint.type=udfps_optical
 persist.vendor.fingerprint.sensor_location=640|2518|105
 
@@ -228,10 +228,6 @@ vendor.usb.use_gadget_hal=1
 
 # WiFi
 wifi.aware.interface=wifi-aware0
-
-# ScrollOptimizer
-persist.sys.perf.scroll_opt=true
-persist.sys.perf.scroll_opt.heavy_app=1
 
 # Update engine
 ro.virtual_ab.compression.threads=true
