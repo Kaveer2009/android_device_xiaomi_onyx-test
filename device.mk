@@ -134,6 +134,25 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/permissions/camerax-vendor-extensions.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/camerax-vendor-extensions.xml
 
+# Dexopt
+ifeq ($(TARGET_BUILD_VARIANT),user)
+PRODUCT_SYSTEM_PROPERTIES += \
+    pm.dexopt.post-boot=speed \
+    pm.dexopt.first-boot=speed \
+    pm.dexopt.boot=speed \
+    pm.dexopt.install=speed \
+    pm.dexopt.install-bulk=speed \
+    pm.dexopt.install-bulk-secondary=speed \
+    pm.dexopt.bg-dexopt=speed \
+    pm.dexopt.ab-ota=speed \
+    pm.dexopt.inactive=speed \
+    pm.dexopt.cmdline=speed \
+    pm.dexopt.shared=speed
+
+PRODUCT_DEX_PREOPT_DEFAULT_COMPILER_FILTER := speed
+OVERRIDE_DISABLE_DEXOPT_ALL := false
+endif
+
 # Dalvik
 PRODUCT_VENDOR_PROPERTIES += \
     dalvik.vm.heapstartsize=24m \
