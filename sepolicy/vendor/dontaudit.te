@@ -17,3 +17,46 @@ dontaudit hal_wifi_default self:capability sys_module;
 dontaudit {
   hal_camera_default
 } default_prop:file r_file_perms;
+
+# Wifi
+dontaudit hal_wifi_default persist_vendor_debug_wifi_prop:file read;
+
+# Shell
+dontaudit shell kernel:system syslog_read;
+dontaudit shell {
+  system_dlkm_file
+  mnt_vendor_file
+  metadata_file
+  linkerconfig_file
+}:dir search;
+dontaudit shell proc_filesystems:file read;
+
+# App harmless denials
+dontaudit gmscore_app incremental_prop:file read;
+dontaudit gmscore_app proc_filesystems:file read;
+dontaudit untrusted_app debugfs_trace_marker:file read;
+dontaudit untrusted_app mnt_vendor_file:dir search;
+dontaudit untrusted_app mnt_product_file:dir search;
+dontaudit untrusted_app cache_file:lnk_file read;
+dontaudit untrusted_app block_device:dir search;
+dontaudit untrusted_app {
+  selinuxfs
+  proc_tty_drivers
+  proc
+}:file read;
+dontaudit untrusted_app {
+  sysfs
+  sysfs_net
+}:dir search;
+dontaudit untrusted_app serialno_prop:file read;
+dontaudit untrusted_app qemu_sf_lcd_density_prop:file read;
+dontaudit untrusted_app qemu_hw_prop:file read;
+dontaudit untrusted_app app_data_file:file read;
+dontaudit isolated_app content_capture_service:service_manager find;
+dontaudit isolated_app app_data_file:file read;
+dontaudit priv_app proc_filesystems:file read;
+dontaudit platform_app proc_filesystems:file read;
+dontaudit platform_app incremental_prop:file read;
+dontaudit system_app proc_filesystems:file read;
+dontaudit system_app incremental_prop:file read;
+dontaudit system_server app_zygote_tmpfs:file read;
