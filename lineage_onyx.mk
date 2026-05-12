@@ -17,7 +17,4 @@ PRODUCT_NAME := lineage_onyx
 PRODUCT_DEVICE := onyx
 PRODUCT_MANUFACTURER := Xiaomi
 
-# Set BUILD_FINGERPRINT variable to be picked up by both system and vendor build.prop
-BuildFingerprint=POCO/onyx_global/onyx:16/BP2A.250605.031.A3/OS3.0.7.0.WOLMIXM:user/release-keys
-
 PRODUCT_GMS_CLIENTID_BASE := android-xiaomi

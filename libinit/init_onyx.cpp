@@ -63,22 +63,22 @@ void vendor_load_properties() {
     if (region == "IN") {
         device = "onyx";
         brand = "POCO";
-        description = "onyx_in-user 16 BP2A.250605.031.A3 OS3.0.6.0.WOLINXM release-keys";
-        fingerprint = "POCO/onyx_in/onyx:16/BP2A.250605.031.A3/OS3.0.6.0.WOLINXM:user/release-keys";
+        description = "onyx_in-user 16 BP2A.250605.031.A3 OS3.0.7.0.WOLINXM release-keys";
+        fingerprint = "POCO/onyx_in/onyx:16/BP2A.250605.031.A3/OS3.0.7.0.WOLINXM:user/release-keys";
         marketname = "POCO F7";
         model = "25053PC47I";
     } else if (region == "GL") {
         device = "onyx";
         brand = "POCO";
-        description = "onyx_global-user 16 BP2A.250605.031.A3 OS3.0.6.0.WOLMIXM release-keys";
-        fingerprint = "POCO/onyx_global/onyx:16/BP2A.250605.031.A3/OS3.0.6.0.WOLMIXM:user/release-keys";
+        description = "onyx_global-user 16 BP2A.250605.031.A3 OS3.0.7.0.WOLMIXM release-keys";
+        fingerprint = "POCO/onyx_global/onyx:16/BP2A.250605.031.A3/OS3.0.7.0.WOLMIXM:user/release-keys";
         marketname = "POCO F7";
         model = "25053PC47G";
     } else if (region == "CN") {
         device = "onyx";
         brand = "Redmi";
-        description = "onyx-user 16 BP2A.250605.031.A3 OS3.0.6.0.WOLCNXM release-keys";
-        fingerprint = "Redmi/onyx/onyx:16/BP2A.250605.031.A3/OS3.0.6.0.WOLCNXM:user/release-keys";
+        description = "onyx-user 16 BP2A.250605.031.A3 OS3.0.7.0.WOLCNXM release-keys";
+        fingerprint = "Redmi/onyx/onyx:16/BP2A.250605.031.A3/OS3.0.7.0.WOLCNXM:user/release-keys";
         marketname = "REDMI Turbo 4 Pro Edition";
         model = "25053RT47C";
     }
