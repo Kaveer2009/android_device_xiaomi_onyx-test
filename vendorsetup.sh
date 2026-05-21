@@ -1,13 +1,34 @@
-#!/bin/bash
+# Boot Animation
+TARGET_BOOT_ANIMATION_RES := 1080
 
-# Hardware xiaomi (fresh clone)
-echo "Cloning hardware xiaomi source..."
-rm -rf hardware/xiaomi
-git clone -b lineage-23.2 https://github.com/AxionAOSP-devices/android_hardware_xiaomi.git hardware/xiaomi
+# Device config
+TARGET_HAS_UDFPS := true
+TARGET_ENABLE_BLUR := true
+TARGET_EXCLUDES_AUDIOFX := false
+TARGET_FACE_UNLOCK_SUPPORTED := true
 
-# Kernel source (fresh clone)
-echo "Cloning kernel source tree..."
-rm -rf device/xiaomi/onyx-kernel
-git clone -b lineage-23.2 https://github.com/AxionAOSP-devices/android_kernel_xiaomi_onyx.git device/xiaomi/onyx-kernel
+# TARGET_BUILD_PACKAGE options:
+# 1 - vanilla (default)
+# 2 - microg
+# 3 - gapps
+TARGET_BUILD_PACKAGE := 3
 
-echo "vendorsetup.sh execution complete."
+# Debugging
+TARGET_INCLUDE_MATLOG := true
+
+# Extras
+TARGET_INCLUDE_SIMPLE_TUNE := true
+
+# Maintainer
+ALPHA_MAINTAINER := "Raphael X Kaveer"
+
+ifeq ($(TARGET_BUILD_PACKAGE),3)
+  # (valid only for GAPPS builds)
+  TARGET_INCLUDE_GOOGLE_COMMS := true
+  TARGET_INCLUDE_PIXEL_LAUNCHER := true
+  TARGET_SUPPORTS_QUICK_TAP := true
+  TARGET_SUPPORTS_CALL_RECORDING := true
+  TARGET_INCLUDE_STOCK_ARCORE := true
+  TARGET_INCLUDE_LIVE_WALLPAPERS := true
+  TARGET_SUPPORTS_GOOGLE_RECORDER := false
+endif
